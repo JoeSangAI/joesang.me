@@ -1,0 +1,1010 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>每日工作台示例</title>
+<style>
+:root { color: #171815; font-synthesis: none; background: #f1f0eb; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+* { box-sizing: border-box; }
+body { background: #f2f1eb; margin: 0; position: relative; }
+button, input, textarea, select { font: inherit; }
+button { color: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid #38634b; outline-offset: 2px; }
+[hidden] { display: none !important; }
+.sr-only { clip: rect(0 0 0 0); white-space: nowrap; border: 0; width: 1px; height: 1px; margin: -1px; padding: 0; position: absolute; overflow: hidden; }
+details { margin-top: 12px; }
+summary { cursor: pointer; color: #38634b; font-size: 14px; }
+svg.i { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: 0 0 auto; }
+.markdown-link { color: #38634b; cursor: pointer; background: none; border: 0; border-bottom: 1px solid #9bb6a1; padding: 0; overflow-wrap: anywhere; text-decoration: none; display: inline; font-size: inherit; }
+.markdown-link svg { vertical-align: middle; margin-left: 3px; }
+.markdown { overflow-wrap: anywhere; line-height: 1.82; }
+.markdown p { margin: .6em 0; }
+
+/* 顶栏 */
+.demo-topbar { background: #18473b; border-bottom: 1px solid rgba(255,255,255,.125); }
+.desk-header { max-width: 1136px; margin: 0 auto; padding: 0 48px; display: flex; align-items: center; gap: 48px; height: 76px; }
+.desk-brand { color: #fffdf5; white-space: nowrap; align-items: center; gap: 16px; font-size: 15px; font-weight: 600; text-decoration: none; display: flex; }
+.desk-brand img { object-fit: contain; width: 46px; height: 46px; display: block; }
+.desk-brand span { border-left: 1px solid rgba(255,255,255,.25); padding-left: 16px; }
+.desk-nav { align-self: stretch; gap: 32px; display: flex; min-width: 0; }
+.desk-nav button, .desk-nav .nav-off { color: #d1e1d8; cursor: pointer; background: none; border: 0; min-width: 48px; padding: 0 8px; font-size: 16px; position: relative; white-space: nowrap; display: flex; align-items: center; justify-content: center; }
+.desk-nav button:hover, .desk-nav button.selected { color: #fffdf5; }
+.desk-nav button.selected { font-weight: 650; }
+.desk-nav button.selected::after { content: ""; background: #eb805a; border-radius: 2px 2px 0 0; height: 3px; position: absolute; bottom: -1px; left: 8px; right: 8px; }
+.desk-nav .nav-off { opacity: .42; cursor: default; }
+.desk-header button:focus-visible, .desk-header a:focus-visible { outline-offset: -8px; outline-color: #fffdf5; }
+.demo-badge { margin-left: auto; color: #fffdf5; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.333); border-radius: 6px; padding: 7px 11px; font-size: 12px; white-space: nowrap; }
+
+/* 页面骨架 */
+.desk-shell { --ink: #18473b; --text: #202521; --muted: #56615b; --line: #d9dcd5; --surface: #fffefa; --canvas: #f2f1eb; --desk-title-font: "Songti SC", "STSong", Georgia, serif; max-width: 1136px; color: var(--text); -webkit-font-smoothing: antialiased; margin: 0 auto; padding: 0 48px; font-size: 16px; }
+.desk-main { max-width: 1040px; margin: auto; padding: 36px 0 56px; }
+.desk-title-row, .desk-sources .page-heading { flex-direction: row; justify-content: space-between; align-items: center; gap: 20px; margin: 0 0 28px; display: flex; }
+.desk-heading-line { flex-wrap: wrap; align-items: baseline; gap: 20px; display: flex; }
+.desk-heading-line h1, .desk-sources .page-heading h1, .discoveries-heading h1 { letter-spacing: 0; color: var(--text); margin: 0; font-size: 28px; font-weight: 650; line-height: 1.35; }
+.desk-date { color: var(--muted); white-space: nowrap; font-size: 14px; }
+.desk-toolbar { align-items: center; gap: 8px; display: flex; }
+.desk-refresh, .desk-context-note { min-height: 38px; color: var(--ink); cursor: pointer; background: #fffefa; border: 1px solid #c9d1c9; border-radius: 7px; justify-content: center; align-items: center; gap: 7px; padding: 8px 13px; font-size: 13px; font-weight: 500; display: flex; box-shadow: 0 1px 2px rgba(24,39,27,.02); }
+.desk-refresh:hover, .desk-context-note:hover, .desk-refresh[aria-expanded="true"] { background: #e8ede4; border-color: #a9baa6; }
+.status-line { flex-direction: column; gap: 6px; margin: 8px 0 18px; display: flex; }
+.status-line-main { cursor: pointer; color: #2f4a3c; text-align: left; background: none; border: 0; align-items: center; gap: 8px; padding: 0; font-size: 15px; display: inline-flex; align-self: flex-start; }
+.news-entrance { color: #426247; text-decoration: none; display: flex; align-items: center; background: none; border: 0; border-radius: 5px; gap: 8px; margin: 0 0 12px; padding: 9px 12px; width: 100%; cursor: pointer; text-align: left; }
+.news-entrance:hover { background: #e9ede4; }
+.news-entrance strong { font-size: 13px; font-weight: 500; }
+.news-entrance-count { white-space: nowrap; margin-left: auto; font-size: 12px; color: #71816c; }
+.desk-layout { grid-template-columns: minmax(0, 1fr); align-items: start; display: grid; }
+.desk-events { min-width: 0; }
+.desk-list-heading { justify-content: space-between; align-items: baseline; gap: 12px; padding: 0 2px 14px; display: flex; }
+.desk-list-heading.tight { padding-bottom: 8px; }
+.desk-list-heading h2 { margin: 0; font-size: 14px; font-weight: 600; }
+.desk-list-heading h2 span { color: var(--muted); margin-left: 10px; font-size: 13px; font-weight: 400; }
+.desk-list-heading > span { color: var(--muted); font-size: 12px; }
+
+/* 事项卡片 */
+.desk-event-list { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; margin: 0; padding: 0 26px; list-style: none; box-shadow: 0 2px 8px rgba(35,51,34,.01); }
+.desk-event { border-bottom: 1px solid var(--line); grid-template-columns: 24px minmax(0, 1fr); gap: 16px; padding: 24px 0 20px; display: grid; position: relative; transition: opacity .35s, transform .35s; }
+.desk-event:last-child { border-bottom: 0; }
+.desk-event.is-leaving { opacity: 0; transform: translateX(24px); }
+.desk-event.is-new { animation: flash 1.8s ease-out; }
+@keyframes flash { from { background: rgba(235,128,90,.16); } to { background: transparent; } }
+.desk-event-index { color: #727e71; font-variant-numeric: tabular-nums; font-size: 12px; line-height: 29px; }
+.desk-event-body { min-width: 0; }
+.desk-event-meta { color: #59625e; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 12px; line-height: 1.5; display: flex; }
+.desk-event-state { color: #56615b; }
+.desk-event-meta > span + span::before { content: "·"; color: #889381; margin-right: 8px; }
+.desk-event h3 { font-family: var(--desk-title-font); letter-spacing: .015em; color: #18473b; overflow-wrap: anywhere; margin: 0; font-size: 22px; font-weight: 600; line-height: 1.55; padding-right: 54px; }
+.desk-event-title { color: inherit; font: inherit; text-align: left; cursor: pointer; background: none; border: 0; align-items: center; gap: 6px; padding: 0; display: inline-flex; }
+.desk-event-title:hover { color: #18473b; }
+.desk-event-title svg { color: #6d806f; transition: transform .15s; }
+.desk-next-action, .desk-summary { color: #242b27; overflow-wrap: anywhere; max-width: 49em; margin: 9px 0 0; font-size: 16px; line-height: 1.8; }
+.desk-next-action { gap: 9px; display: flex; }
+.desk-next-action svg { color: #59785d; margin-top: 7px; }
+.desk-event-bottom { justify-content: space-between; align-items: center; gap: 12px; min-height: 34px; margin-top: 8px; padding-top: 4px; display: flex; }
+.desk-person-list { flex-wrap: wrap; align-items: center; gap: 7px; display: flex; }
+.desk-related-label { color: #606761; margin-right: 3px; font-size: 12px; }
+.desk-person { position: relative; margin: 0 !important; }
+.desk-person summary { color: #405048; cursor: pointer; background: #f4f3ee; border: 1px solid #dfdfd7; border-radius: 5px; align-items: center; gap: 6px; padding: 3px 9px; min-height: 32px; font-size: 13px; line-height: 1.7; list-style: none; display: flex; white-space: nowrap; }
+.desk-person summary::-webkit-details-marker { display: none; }
+.desk-person summary:hover, .desk-person[open] summary { background: #e8eee9; border-color: #849a8c; }
+.desk-person-dot { background: #6c8961; border-radius: 50%; width: 4px; height: 4px; }
+.desk-person-popover { z-index: 35; background: #fffefa; color: #354039; overflow-wrap: anywhere; border: 1px solid #bdc8bd; border-radius: 8px; width: min(310px, calc(100vw - 32px)); padding: 18px; font-size: 14px; line-height: 1.75; position: absolute; top: calc(100% + 8px); left: 0; box-shadow: 0 12px 40px rgba(32,56,45,.15); }
+.desk-person-popover p { margin: 7px 0; }
+.desk-person-popover strong { color: var(--ink); font-size: 16px; }
+.desk-person-authority { color: #69716a; margin-top: 10px; font-size: 12px; display: block; }
+.desk-person-menu { flex-wrap: wrap; gap: 8px; display: flex; }
+.desk-person-correct { color: #214b3d; cursor: pointer; background: #f3f5f0; border: 1px solid #ccd4ce; border-radius: 6px; margin-top: 12px; padding: 7px 10px; font-size: 13px; display: block; }
+.desk-person-correct:hover { background: #e9eee7; }
+.desk-event:has(.desk-person[open]), .desk-event:has(.desk-placement-menu[open]) { z-index: 12; }
+.desk-expand { color: #526c50; cursor: pointer; white-space: nowrap; background: none; border: 0; border-radius: 5px; justify-content: center; align-items: center; gap: 5px; min-height: 34px; padding: 8px 9px; font-size: 13px; display: flex; }
+.desk-expand:hover { color: var(--ink); background: #edf1e9; }
+.desk-action-row { border-top: 1px solid #e1e5dc; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 8px; margin-top: 13px; padding-top: 12px; display: grid; }
+.desk-action-controls { flex-wrap: wrap; justify-content: flex-start; align-items: center; gap: 4px; min-width: 0; display: flex; }
+.desk-action-controls :is(.action-circle, .action-text) { color: #244d3d; background: #fffefa; border: 1px solid #bdcabe; border-radius: 6px; flex: 0 0 auto; justify-content: center; align-items: center; gap: 5px; min-width: 72px; height: 40px; padding: 7px 14px; font: 500 14px/1.4 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; display: inline-flex; cursor: pointer; }
+.desk-action-controls :is(.action-circle, .action-text):hover:not(:disabled), .desk-action-controls .action-text[aria-expanded="true"] { background: #edf3ee; border-color: #8fa997; }
+.card-unread-dot { vertical-align: middle; background: #bc5b4c; border-radius: 50%; width: 7px; height: 7px; margin: 0 0 1px 9px; display: inline-block; }
+
+/* 四象限 */
+.desk-quadrant-board { min-width: 0; position: relative; }
+.desk-quadrant-nav { background: var(--canvas); border-bottom: 1px solid #d6dbd3; padding: 10px 0 14px; }
+.desk-quadrant-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; display: grid; }
+.desk-quadrant-tab { color: #28332b; text-align: left; cursor: pointer; background: #fffefa; border: 1px solid #cbd2c9; border-radius: 8px; flex-direction: column; justify-content: center; gap: 4px; min-width: 0; min-height: 52px; padding: 11px 16px; transition: background-color .14s, border-color .14s, box-shadow .14s; display: flex; }
+.desk-quadrant-tab:hover { background: #e9eee7; border-color: #819d89; }
+.desk-quadrant-tab[aria-selected="true"] { color: #fffdf5; background: #18473b; border-color: #18473b; box-shadow: 0 2px 5px rgba(22,60,48,.125); }
+.desk-quadrant-tab-title { align-items: center; gap: 8px; min-width: 0; display: flex; }
+.desk-quadrant-tab-title strong { font-size: 16px; font-weight: 650; white-space: nowrap; }
+.desk-quadrant-number { color: #3c5245; background: #e9ede6; border-radius: 5px; flex: 0 0 auto; place-items: center; width: 22px; height: 22px; font-size: 13px; font-weight: 600; display: grid; }
+.desk-quadrant-count { color: #415248; font-variant-numeric: tabular-nums; background: #edf0e9; border-radius: 5px; justify-content: center; align-items: center; min-width: 30px; height: 26px; margin-left: auto; font-size: 15px; display: inline-flex; }
+.desk-quadrant-tab[aria-selected="true"] .desk-quadrant-number, .desk-quadrant-tab[aria-selected="true"] .desk-quadrant-count { color: #fffdf5; background: rgba(255,255,255,.11); }
+.desk-quadrant { border-radius: 9px; min-width: 0; margin-top: 16px; }
+.desk-quadrant .desk-event-list { box-shadow: none; background: none; border: 0; border-radius: 0; padding: 0; }
+.desk-quadrant .desk-event { background: #fffefa; border: 1px solid #d2d8cf; border-radius: 10px; margin: 0 0 16px; padding: 22px 24px 18px 46px; display: block; box-shadow: 0 2px 5px rgba(36,43,36,.024); transition: border-color .14s, box-shadow .14s, opacity .35s, transform .35s; }
+.desk-quadrant .desk-event:last-child { border-bottom: 1px solid #d2d8cf; margin-bottom: 0; }
+.desk-quadrant .desk-event:hover { border-color: #a9b9a9; box-shadow: 0 3px 10px rgba(36,43,36,.035); }
+.desk-quadrant .desk-event-index { display: none; }
+.desk-quadrant .desk-event h3 { line-height: 1.6; display: block; }
+.desk-board-event .desk-event-title { width: 100%; padding-right: 18px; display: block; position: relative; }
+.desk-board-event .desk-event-title svg { position: absolute; top: 7px; right: 0; }
+.desk-board-event .desk-next-action { max-width: none; margin-top: 10px; line-height: 1.85; }
+.desk-board-event .desk-event-meta { margin: 0 50px 4px 0; font-size: 13px; line-height: 1.6; }
+.desk-card-dates { color: #5b665d; flex-wrap: wrap; gap: 6px 16px; margin: 4px 0 0; font-size: 13px; display: flex; font-variant-numeric: tabular-nums; }
+.desk-timing-due { color: #9a3c30; font-weight: 600; }
+.desk-timing-review { color: #80571d; font-weight: 600; }
+.desk-board-event .desk-action-row { gap: 9px; margin-top: 12px; padding-top: 10px; }
+.desk-board-event .desk-action-controls { gap: 12px; }
+.desk-quadrant-empty { color: var(--muted); font-size: 14px; padding: 22px 4px; }
+.desk-placement-menu { position: absolute; top: 16px; left: 8px; z-index: 6; margin: 0 !important; }
+.desk-drag-handle { color: #627669; cursor: pointer; border-radius: 5px; place-items: center; width: 30px; height: 34px; list-style: none; display: grid; }
+.desk-drag-handle::-webkit-details-marker { display: none; }
+.desk-drag-handle:hover, .desk-placement-menu[open] .desk-drag-handle { color: #18473b; background: #e5ede1; }
+.desk-placement-options { position: absolute; top: 38px; left: 0; width: 168px; background: #fffefa; border: 1px solid #cbd2c9; border-radius: 8px; padding: 6px; box-shadow: 0 10px 28px rgba(35,51,34,.16); }
+.desk-placement-options small { color: #6d7d70; font-size: 12px; display: block; padding: 4px 8px 6px; }
+.desk-placement-options button { text-align: left; color: #355b41; cursor: pointer; background: none; border: 0; border-radius: 5px; width: 100%; padding: 8px; font-size: 14px; display: block; }
+.desk-placement-options button:hover:not(:disabled) { background: #edf1e9; }
+.desk-placement-options button:disabled { opacity: .45; cursor: default; }
+.desk-card-intelligence { z-index: 1; position: absolute; top: 18px; right: 18px; display: flex; align-items: center; }
+.card-codex { cursor: pointer; color: #18473b; background: #edf3ee; border: 1px solid #cbd9cf; border-radius: 10px; flex: 0 0 40px; justify-content: center; align-items: center; width: 40px; height: 40px; padding: 7px; display: inline-flex; box-shadow: 0 1px 3px rgba(24,71,59,.04); transition: transform .18s, box-shadow .18s, background .18s; }
+.card-codex:hover { background: #e1ece3; border-color: #8ea999; transform: translateY(-1px); box-shadow: 0 0 0 4px rgba(24,71,59,.04); }
+.card-codex svg { width: 24px; height: 24px; display: block; }
+
+/* 记一下 / 回应 */
+.desk-inline-composer { max-width: 700px; margin: 0 0 28px; }
+.desk-inline-composer > .desk-expand { margin-left: auto; }
+.desk-context-composer { margin-top: 14px; margin-bottom: 0; }
+.desk-note-panel { background: var(--surface); border: 1px solid #cfdac8; border-radius: 10px; padding: 24px; }
+.desk-context-composer .desk-note-panel { background: #f7f8f3; border-color: #bbc9be; }
+.desk-note-heading { color: var(--ink); align-items: center; gap: 10px; display: flex; min-width: 0; }
+.desk-note-heading h2 { margin: 0; font-size: 17px; font-weight: 600; white-space: nowrap; }
+.desk-note-heading > span { text-overflow: ellipsis; white-space: nowrap; color: #65735f; min-width: 0; max-width: 70%; font-size: 12px; overflow: hidden; }
+.desk-note-panel form { margin-top: 20px; }
+.desk-note-line { background: #fffefa; border: 1px solid #becdb5; border-radius: 6px; align-items: center; display: flex; overflow: hidden; }
+.desk-note-line:focus-within { outline: 2px solid #38634b; outline-offset: 2px; }
+.desk-note-line input { color: #283e2d; background: none; border: 0; outline: 0; width: 100%; min-width: 0; padding: 12px 13px; font-size: 15px; line-height: 1.5; }
+.attachment-button { color: #476449; background: none; border: 0; border-left: 1px solid #d3ddd0; place-items: center; width: 40px; height: 40px; display: grid; opacity: .42; cursor: not-allowed; flex: 0 0 auto; }
+.desk-note-submit { justify-content: space-between; align-items: center; gap: 8px; margin-top: 12px; min-height: 36px; display: flex; }
+.desk-note-submit > span { color: #59625e; font-size: 12px; }
+.desk-note-submit button { color: #f1f0eb; background: var(--ink); cursor: pointer; border: 0; border-radius: 6px; align-items: center; gap: 7px; padding: 10px 16px; font-size: 14px; display: flex; }
+.desk-note-submit button:hover { background: #2e5c44; }
+.desk-recent-notes { border-top: 1px solid var(--line); margin-top: 22px; padding-top: 18px; }
+.desk-recent-notes h3 { color: #4b6740; margin: 0 0 12px; font-size: 14px; }
+.desk-saved-note { margin: 12px 0 0; }
+.desk-saved-note > span { color: #776126; font-size: 12px; }
+.desk-saved-note > span.is-done { color: #4c7a5a; }
+.desk-saved-note p { white-space: pre-wrap; overflow-wrap: anywhere; color: #43583a; margin: 4px 0; font-size: 14px; line-height: 1.8; }
+.desk-saved-note .desk-note-feedback { color: #365d40; border-left: 2px solid #9bb28b; margin-top: 10px; padding-left: 10px; }
+
+/* 详情弹层 */
+.desk-dialog-backdrop { --ink: #18473b; --text: #242b27; --line: #dde0d8; --surface: #fffefa; z-index: 50; background: rgba(23,43,36,.28); padding: 0 24px; position: absolute; inset: 0; color: #242b27; font-size: 16px; }
+.desk-detail-drawer { background: #fffefa; border: 1px solid #c7d0c5; border-radius: 14px; width: min(800px, 100%); margin: 0 auto; padding: 28px 34px 32px; position: relative; box-shadow: 0 24px 80px rgba(19,43,36,.24); }
+.desk-detail-drawer > header { justify-content: space-between; align-items: flex-start; gap: 18px; background: #fffefa; border-bottom: 1px solid #dde0d8; margin: -4px 0 22px; padding: 4px 0 16px; display: flex; }
+.desk-detail-drawer h2 { color: #18473b; letter-spacing: .015em; margin: 0; font: 600 26px/1.5 "Songti SC", STSong, Georgia, serif; overflow-wrap: anywhere; min-width: 0; }
+.desk-detail-header-actions { flex: 0 0 auto; align-items: center; gap: 10px; display: flex; }
+.desk-detail-drawer > header button.dialog-close, .desk-detail-header-actions > button.dialog-close { color: #526c50; cursor: pointer; background: none; border: 0; border-radius: 5px; place-items: center; width: 40px; height: 40px; display: grid; }
+.desk-detail-drawer > header button.dialog-close:hover { color: var(--ink); background: #e8ede4; }
+.desk-drawer-plan { background: #f0f4ee; border-radius: 7px; gap: 12px; padding: 14px 16px; display: grid; margin: 0 0 24px; }
+.desk-drawer-plan p { color: #28362e; gap: 5px; font-size: 16px; display: grid; margin: 0; line-height: 1.7; }
+.desk-drawer-plan b { color: #607066; font: 500 12px/1.5 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
+.desk-detail-section { margin: 0 0 24px; }
+.desk-detail-section h3 { color: #5b6c62; margin: 0 0 8px; font: 600 13px/1.6 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
+.desk-detail-section .desk-person-list { margin: 10px 0 0; }
+.desk-detail-section .markdown p { color: #303a33; font-size: 16px; line-height: 1.85; margin: 0; }
+.desk-detail-sources .markdown-link { overflow-wrap: anywhere; max-width: 100%; margin: 0 18px 8px 0; display: inline-flex; align-items: center; gap: 3px; font-size: 15px; }
+.desk-detail-history { color: #58675e; border-top: 1px solid #dde0d8; margin-top: 0; }
+.desk-detail-history > summary { cursor: pointer; align-items: center; gap: 7px; width: fit-content; padding: 12px 0; font-size: 13px; list-style: none; display: flex; }
+.desk-detail-history > summary::-webkit-details-marker { display: none; }
+.desk-detail-history > summary::before { content: "›"; font-size: 18px; line-height: 1; display: inline-block; transition: transform .15s; }
+.desk-detail-history[open] > summary::before { transform: rotate(90deg); }
+.desk-detail-history .markdown p { font-size: 15px; line-height: 1.9; color: #303a33; margin: 0 0 12px; }
+.desk-drawer-action { margin: 0 0 14px; }
+.desk-drawer-action small { color: #68716b; font-size: 12px; }
+.desk-history-feedback { white-space: pre-wrap; color: #46564b; border-left: 2px solid #d3dbd3; margin: 6px 0 0; padding: 0 0 0 12px; font-size: 14px; line-height: 1.85; }
+.desk-drawer-action.is-new .desk-history-feedback { border-left-color: #eb805a; color: #2c3d32; }
+.desk-detail-controls { border-top: 1px solid #dde0d8; margin-top: 8px; padding-top: 18px; }
+.desk-context-note { display: inline-flex; }
+.desk-related-count { color: #617168; margin: 0 0 20px; font-size: 14px; }
+.desk-related-items { gap: 16px; margin: 0; padding: 0; list-style: none; display: grid; }
+.desk-related-card { background: #fffefa; border: 1px solid #d6ded4; border-radius: 9px; padding: 18px 20px; }
+.desk-related-card .desk-event-meta { margin-bottom: 0; }
+.desk-related-card h3 { color: #18473b; margin: 9px 0 12px; font: 600 22px/1.5 "Songti SC", STSong, Georgia, serif; }
+.desk-related-card h3 button { color: inherit; font: inherit; text-align: left; cursor: pointer; background: none; border: 0; padding: 0; }
+.desk-related-card .desk-next-action { white-space: pre-wrap; margin: 0; display: block; }
+.desk-related-card .desk-next-action b { color: #617168; margin-bottom: 5px; font: 500 12px/1.5 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; display: block; }
+.desk-related-card > .desk-expand { margin: 12px 0 0 auto; }
+
+/* 昨日 */
+.desk-date-control { align-items: center; gap: 5px; margin: -8px 0 26px; display: flex; }
+.desk-date-control button, .desk-date-control input { color: #46603f; background: #f8f8f3; border: 1px solid #cbd3c8; border-radius: 6px; min-height: 36px; padding: 8px; font-size: 13px; }
+.desk-date-control button { cursor: pointer; align-items: center; display: flex; }
+.desk-date-control input { padding: 7px 10px; }
+.desk-date-control button:disabled { opacity: .35; cursor: default; }
+
+/* 发现 */
+.discoveries-page { max-width: 960px; margin: 0 auto; }
+.discoveries-heading { justify-content: space-between; align-items: center; gap: 20px; margin: 0 0 18px; display: flex; }
+.discoveries-toolbar { align-items: center; gap: 12px; display: flex; }
+.discoveries-toolbar label { color: #627166; align-items: center; gap: 8px; font-size: 13px; display: flex; white-space: nowrap; }
+.discoveries-toolbar select { appearance: none; -webkit-appearance: none; color: #294e3f; background: #fffefa; border: 1px solid #cdd6cb; border-radius: 6px; min-height: 36px; padding: 7px 28px 7px 10px; max-width: 160px; }
+.discoveries-toolbar label svg { pointer-events: none; margin-left: -30px; }
+.discoveries-filters { border-bottom: 1px solid var(--line); gap: 18px; margin: 0 0 14px; display: flex; }
+.discoveries-filters button { color: #607064; cursor: pointer; background: none; border: 0; border-bottom: 2px solid transparent; align-items: center; gap: 7px; min-height: 39px; padding: 6px 2px 9px; font-size: 14px; display: flex; white-space: nowrap; }
+.discoveries-filters button[aria-pressed="true"] { color: #18473b; border-bottom-color: #eb805a; font-weight: 650; }
+.discoveries-filters span { color: #859187; font-size: 12px; font-weight: 400; }
+.discoveries-undo { display: flex; align-items: center; gap: 10px; background: #f4f6f1; border: 1px solid #d8dfd5; border-radius: 7px; padding: 8px 12px; margin: 0 0 14px; font-size: 13px; color: #3d5043; }
+.discoveries-undo span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.discoveries-undo button { background: none; border: 0; color: #2b6a4f; cursor: pointer; padding: 2px 4px; font-size: 13px; }
+.attention-panel { background: #f8f9f5; border: 1px solid #d8dfd5; border-radius: 8px; margin: 0 0 14px; }
+.attention-panel > summary { cursor: pointer; color: #194d40; align-items: center; gap: 10px; padding: 10px 14px; font-size: 14px; font-weight: 600; list-style: none; display: flex; }
+.attention-panel > summary::-webkit-details-marker { display: none; }
+.attention-panel > summary::after { content: "展开"; color: #6d7d70; margin-left: auto; font-size: 12px; font-weight: 400; }
+.attention-panel[open] > summary::after { content: "收起"; }
+.attention-panel summary small { color: #6d7d70; font-size: 12px; font-weight: 400; }
+.attention-body { gap: 12px; padding: 0 14px 14px; display: grid; }
+.attention-body section { min-width: 0; }
+.attention-body h3 { color: #67806c; margin: 0 0 6px; font-size: 12px; font-weight: 600; }
+.attention-body ul { gap: 7px; margin: 0; padding: 0; list-style: none; display: grid; }
+.attention-body li > div { color: #26372e; align-items: center; gap: 8px; font-size: 14px; display: flex; }
+.attention-body li p { color: #6a776c; overflow-wrap: anywhere; margin: 2px 0 0; font-size: 12px; line-height: 1.6; }
+.attention-level { color: #4f6955; background: #e7ede5; border-radius: 4px; padding: 0 6px; font-size: 11px; line-height: 18px; }
+.attention-level[data-level="高"] { color: #8a4b2c; background: #f6e3d8; }
+.attention-composer { align-items: center; gap: 8px; display: flex; }
+.attention-composer input { min-width: 0; color: #26372e; background: #fffefa; border: 1px solid #b6c7bc; border-radius: 6px; flex: 1 1 0; padding: 8px 10px; font-size: 14px; }
+.attention-composer button { color: #fff; cursor: pointer; white-space: nowrap; background: #194d40; border: 0; border-radius: 6px; align-items: center; gap: 4px; padding: 8px 11px; font-size: 13px; display: inline-flex; justify-content: center; }
+.attention-composer button:disabled { opacity: .45; cursor: default; }
+.discoveries-list { margin-top: 3px; }
+.discoveries-list > li { list-style: none; }
+.discoveries-list .desk-event { padding: 25px 0; }
+.discovery-title-row { justify-content: space-between; align-items: flex-start; gap: 15px; display: flex; }
+.discovery-title-row .card-codex { margin: -7px -9px 0 0; }
+.discovery-title { min-width: 0; color: inherit; text-align: left; cursor: pointer; background: none; border: 0; flex: 1 1 0; justify-content: space-between; align-items: center; gap: 12px; padding: 0; display: flex; }
+.discovery-title h3 { flex: 1 1 0; padding-right: 0; }
+.discovery-title svg { color: #788477; transition: transform .16s; }
+.discovery-title[aria-expanded="true"] svg { transform: rotate(180deg); }
+.discovery-relation { color: #8a4b2c; max-width: 50em; margin: 9px 0 0; font-size: 14px; line-height: 1.7; }
+.discovery-body { color: #28332c; overflow-wrap: anywhere; max-width: 50em; margin-top: 13px; font-size: 16px; line-height: 1.88; }
+.discovery-body > p { margin: 0; }
+.discovery-body > p + p { margin-top: .6em; }
+.discovery-read-more { color: #426c50; cursor: pointer; background: none; border: 0; margin: 8px 0 0; padding: 3px 0; font-size: 13px; width: max-content; display: block; }
+.discovery-primary-source { color: #315d42; background: none; border: 0; border-bottom: 1px solid #a9bfae; align-items: center; gap: 5px; margin-top: 13px; padding: 0; font-size: 13px; width: max-content; display: flex; cursor: pointer; }
+.discovery-actions { align-items: center; gap: 8px; margin-top: 17px; display: flex; }
+.discovery-actions button { color: #526958; cursor: pointer; background: none; border: 1px solid transparent; border-radius: 6px; justify-content: center; align-items: center; gap: 6px; min-width: 34px; min-height: 34px; padding: 5px; display: inline-flex; }
+.discovery-actions .discovery-respond { color: #194d40; background: #edf2ed; border-color: #b6c7bc; padding: 5px 11px; }
+.discovery-actions button:hover { background: #e8ede6; }
+.discovery-actions button[aria-pressed="true"] { color: #b4553a; }
+.discovery-actions button[aria-pressed="true"] svg { fill: currentColor; }
+.discovery-composer { background: #fffefa; border: 1px solid #b6c7bc; border-radius: 8px; align-items: flex-end; gap: 9px; margin-top: 12px; padding: 11px; display: flex; }
+.discovery-composer textarea { resize: vertical; color: #26372e; min-width: 0; background: none; border: 0; outline: none; flex: 1 1 0; font-size: 15px; line-height: 1.7; }
+.discovery-composer button { color: #fff; cursor: pointer; background: #194d40; border: 0; border-radius: 6px; align-items: center; gap: 5px; padding: 8px 11px; display: flex; white-space: nowrap; }
+.discovery-response { color: #3d5043; background: #f4f6f1; border-radius: 7px; margin-top: 15px; padding: 13px 15px; font-size: 14px; line-height: 1.75; }
+.discovery-response strong { color: #67806c; font-size: 12px; font-weight: 600; display: block; }
+.discovery-response p { margin: 6px 0 0; }
+.discovery-feedback { border-top: 1px solid #dce4d9; margin-top: 11px; padding-top: 10px; }
+.discovery-feedback.is-pending { color: #8a7a4a; }
+.discoveries-empty { color: var(--muted); font-size: 14px; padding: 26px 0; list-style: none; }
+
+/* 来源 */
+.catalog-summary { color: #2f4a3c; margin: 8px 0 14px; font-size: 15px; }
+.catalog-group { margin: 18px 0 6px; }
+.catalog-group h2 { color: #7a8079; letter-spacing: .04em; margin: 0 0 4px; font-size: 13px; font-weight: 500; }
+.catalog-item { border-top: 1px solid #e3e6e1; }
+.catalog-row { text-align: left; cursor: pointer; width: 100%; color: #2c332e; background: none; border: 0; grid-template-columns: minmax(0,1fr) minmax(0,1.8fr) minmax(0,.9fr) minmax(0,.8fr); grid-template-areas: "name what cadence updated" "today today today today"; align-items: center; gap: 2px 12px; padding: 10px 0; font-size: 14px; display: grid; }
+.catalog-row:hover .catalog-today, .catalog-row[aria-expanded="true"] .catalog-today { color: #38634b; }
+.catalog-name { grid-area: name; align-items: center; gap: 8px; font-weight: 500; display: inline-flex; }
+.catalog-what { color: #636b64; grid-area: what; }
+.catalog-cadence { color: #636b64; grid-area: cadence; }
+.catalog-updated { color: #636b64; text-align: right; grid-area: updated; font-variant-numeric: tabular-nums; }
+.catalog-today { color: #8a918a; grid-area: today; padding-left: 15px; font-size: 12px; }
+.catalog-dot { border-radius: 50%; width: 7px; height: 7px; display: inline-block; flex: 0 0 auto; }
+.dot-ok { background: #4c9a68; } .dot-working { background: #2f7fbf; } .dot-waiting { background: #8b928d; } .dot-needs_you { background: #d0782f; }
+.catalog-detail { padding: 0 0 14px 15px; }
+.health-meta { color: #5f6d56; font-size: 12px; margin: 0 0 8px; }
+.catalog-records { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.catalog-records li { display: grid; grid-template-columns: 44px minmax(0,1fr); gap: 10px; font-size: 13px; line-height: 1.7; color: #3d4a41; }
+.catalog-records time { color: #8a918a; font-variant-numeric: tabular-nums; }
+.catalog-records b { font-weight: 500; color: #18473b; }
+.catalog-uncollected { color: #636b64; margin: 18px 0 6px; font-size: 14px; }
+.catalog-uncollected p { margin: 8px 0; font-size: 13px; }
+.catalog-legend { color: #8a918a; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 12px; display: flex; margin: 16px 0 0; }
+
+/* 提示 */
+.toast { position: absolute; left: 50%; top: 0; z-index: 80; transform: translate(-50%, 6px); background: #18473b; color: #fffdf5; padding: 8px 16px; border-radius: 999px; font-size: 13px; opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; max-width: calc(100% - 32px); text-align: center; box-shadow: 0 6px 20px rgba(24,71,59,.22); }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* 宽度适配 */
+@media (max-width: 1000px) {
+  .desk-shell, .desk-header { padding-left: 32px; padding-right: 32px; }
+  .desk-header { gap: 24px; }
+  .desk-nav { gap: 18px; }
+}
+@media (max-width: 800px) { .desk-brand span { display: none; } }
+@media (max-width: 760px) {
+  .page-heading { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 700px) {
+  .desk-shell, .desk-header { padding-left: 22px; padding-right: 22px; }
+  .desk-header { gap: 16px; }
+  .desk-nav { gap: 12px; }
+  .desk-brand img { width: 42px; height: 42px; }
+  .desk-main { padding-top: 28px; }
+  .desk-heading-line { display: block; }
+  .desk-date { margin-top: 7px; font-size: 13px; display: block; }
+  .desk-title-row, .desk-sources .page-heading { margin-bottom: 24px; }
+  .desk-event-list { padding: 0 18px; }
+  .desk-event { grid-template-columns: 20px minmax(0, 1fr); gap: 12px; }
+  .desk-event h3 { font-size: 21px; padding-right: 48px; }
+  .desk-event-bottom { align-items: flex-start; }
+  .desk-person summary { min-height: 36px; }
+  .desk-card-intelligence { top: 16px; right: 12px; }
+  .desk-quadrant-tab { min-height: 48px; padding: 9px 10px; }
+  .desk-quadrant-tab-title { gap: 6px; }
+  .desk-quadrant-tab-title strong { font-size: 15px; }
+  .desk-quadrant-number { display: none; }
+  .desk-quadrant .desk-event { padding: 18px 14px 14px 42px; }
+  .desk-board-event .desk-action-controls { gap: 8px; }
+  .desk-placement-menu { left: 5px; }
+  .desk-dialog-backdrop { padding: 0 12px; }
+  .desk-detail-drawer { border-radius: 10px; padding: 20px; }
+  .desk-detail-drawer h2 { font-size: 23px; }
+  .discoveries-heading { flex-wrap: wrap; align-items: flex-start; }
+  .discoveries-toolbar { justify-content: flex-start; gap: 8px; width: 100%; }
+  .discoveries-toolbar label { font-size: 12px; }
+  .discoveries-toolbar select { max-width: 130px; padding-right: 23px; }
+  .discoveries-filters { gap: 14px; }
+  .discoveries-list { padding: 0 15px; }
+  .discoveries-list .desk-event { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .discoveries-list .desk-event-index { font-size: 12px; line-height: 1.2; }
+  .discovery-body { font-size: 15px; line-height: 1.83; }
+  .discovery-title-row .card-codex { margin-top: -5px; }
+  .attention-composer { flex-direction: column; align-items: stretch; }
+}
+@media (max-width: 640px) {
+  .catalog-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "name updated" "what what" "cadence cadence" "today today"; }
+  .catalog-what, .catalog-cadence { font-size: 13px; }
+}
+@media (max-width: 600px) {
+  .desk-header { flex-wrap: wrap; row-gap: 4px; height: auto; min-height: 76px; padding-top: 10px; padding-bottom: 10px; }
+  .desk-nav { height: 44px; }
+  .desk-action-controls :is(.action-circle, .action-text) { height: 44px; }
+  .desk-detail-drawer > header { gap: 10px; }
+}
+@media (max-width: 480px) {
+  .desk-shell, .desk-header { padding-left: 16px; padding-right: 16px; }
+  .desk-header { gap: 10px; }
+  .desk-nav { gap: 6px; }
+  .desk-nav button, .desk-nav .nav-off { min-width: 38px; padding: 0 4px; font-size: 14px; }
+  .desk-nav button.selected::after { left: 4px; right: 4px; }
+  .demo-badge { padding: 5px 9px; font-size: 11px; }
+  .desk-title-row { gap: 10px; }
+  .desk-refresh { padding: 8px 10px; }
+  .desk-event-list { padding: 0 14px; }
+  .desk-event { grid-template-columns: 18px minmax(0, 1fr); gap: 10px; padding: 21px 0 17px; }
+  .desk-event h3 { font-size: 18px; }
+  .desk-quadrant .desk-event h3 { font-size: 19px; }
+  .desk-next-action, .desk-summary { font-size: 15px; line-height: 1.85; }
+  .desk-event-index { font-size: 11px; }
+  .desk-event-meta { font-size: 12px; }
+  .desk-event-bottom { gap: 6px; }
+  .desk-related-label { display: none; }
+  .desk-person summary { padding: 3px 7px; font-size: 12px; }
+  .desk-expand { padding: 7px 4px; font-size: 12px; }
+  .desk-quadrant-tab-title strong { font-size: 14px; }
+  .desk-quadrant-count { min-width: 26px; height: 24px; font-size: 14px; }
+  .desk-note-panel { padding: 18px; }
+  .desk-detail-drawer { padding: 18px 16px; }
+  .desk-detail-drawer h2 { font-size: 21px; }
+  .desk-related-card { padding: 16px; }
+  .desk-related-card h3 { font-size: 19px; }
+  .discoveries-heading h1 { font-size: 26px; }
+  .discoveries-list { padding: 0 14px; }
+}
+@media (max-width: 400px) { .desk-nav .nav-off { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="demo-topbar">
+  <header class="desk-header">
+    <a class="desk-brand" href="#today" data-go="today" aria-label="SANG 每日工作台"><img src="data:image/png;base64,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" alt=""><span>每日工作台</span></a>
+    <nav class="desk-nav" aria-label="主导航">
+      <button type="button" data-go="today" class="selected" aria-current="page">今日</button>
+      <button type="button" data-go="yesterday">昨日</button>
+      <button type="button" data-go="discoveries">发现</button>
+      <button type="button" data-go="sources">来源</button>
+      <span class="nav-off" aria-disabled="true" title="示例里没有这一页">归档</span>
+      <span class="nav-off" aria-disabled="true" title="示例里没有这一页">用量</span>
+    </nav>
+    <span class="demo-badge">示例数据 · 已脱敏</span>
+  </header>
+</div>
+<div class="desk-shell" id="shell">
+  <main class="desk-main">
+    <div data-page="today" id="today"></div>
+    <div data-page="yesterday" id="yesterday" hidden></div>
+    <div data-page="discoveries" id="discoveries" hidden></div>
+    <div data-page="sources" id="sources" hidden></div>
+  </main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="codex-mark" viewBox="0 0 24 24"><path d="M16.0005 13.5992C16.4972 13.5995 16.9007 14.0029 16.9009 14.4996C16.9009 14.9965 16.4974 15.3997 16.0005 15.4H13.0005C12.5035 15.4 12.1002 14.9967 12.1002 14.4996C12.1004 14.0027 12.5036 13.5992 13.0005 13.5992H16.0005Z" fill="#0D0D0D"/><path d="M8.03765 8.72811C8.46377 8.47284 9.01638 8.61074 9.27203 9.03671L10.6177 11.2789C10.8836 11.7221 10.8834 12.277 10.6177 12.7203L9.27203 14.9625C9.01633 15.3887 8.46385 15.5267 8.03765 15.2711C7.61143 15.0153 7.47333 14.4629 7.72906 14.0367L8.95074 11.9996L7.72906 9.96249C7.47341 9.53628 7.61146 8.98382 8.03765 8.72811Z" fill="#0D0D0D"/><path fill-rule="evenodd" clip-rule="evenodd" d="M9.3316 2.03768C11.1644 1.54688 13.0268 2.04668 14.356 3.20174C16.0859 2.86512 17.9511 3.36418 19.2935 4.70663C20.6356 6.04882 21.1326 7.91288 20.7964 9.64217C21.9527 10.9716 22.4534 12.8349 21.9625 14.6685C21.4711 16.5025 20.1051 17.8657 18.439 18.439C17.8658 20.1047 16.503 21.47 14.6695 21.9615C12.8356 22.4528 10.9727 21.9519 9.64312 20.7955C7.91371 21.1319 6.04993 20.635 4.70757 19.2926C3.36558 17.9505 2.86659 16.0866 3.20269 14.357C2.04693 13.0273 1.54757 11.1638 2.03863 9.33065C2.52997 7.49759 3.89436 6.13282 5.56011 5.55917C6.13382 3.8935 7.49837 2.52891 9.3316 2.03768ZM13.2623 4.63534C12.3606 3.80149 11.067 3.4361 9.79742 3.77596C8.52745 4.11626 7.58924 5.0796 7.22515 6.25253C7.08145 6.71575 6.71753 7.07928 6.25445 7.22323C5.08133 7.58702 4.11844 8.52622 3.77789 9.79647C3.43759 11.0667 3.80148 12.3606 4.63531 13.2623C4.96467 13.6184 5.09776 14.1154 4.99078 14.5885C4.71939 15.7864 5.05109 17.0891 5.98101 18.0191C6.91085 18.949 8.21345 19.2801 9.41168 19.0084L9.58941 18.9791C9.94695 18.9432 10.3065 19.0397 10.5982 19.2496L10.7378 19.3639L10.9117 19.5142C11.8015 20.2407 13.0127 20.5413 14.2037 20.2223C15.4733 19.8818 16.4111 18.9191 16.775 17.7457C16.9189 17.2824 17.2832 16.9186 17.7466 16.775L17.9634 16.6998C19.0376 16.2923 19.9051 15.3936 20.2242 14.2027C20.5641 12.9328 20.1989 11.6385 19.3648 10.7369C19.0353 10.3806 18.9021 9.88399 19.0093 9.41073L19.0533 9.18514C19.2372 8.0514 18.8917 6.85176 18.0201 5.98006C17.0901 5.05003 15.7865 4.71826 14.5884 4.98983C14.1153 5.09712 13.6186 4.96467 13.2623 4.63534Z" fill="#0D0D0D"/></symbol></defs></svg>
+<script>
+/* ---------- 虚构数据（全部为示例，不对应任何真实的人或机构） ---------- */
+const TODAY_LABEL = "11月10日星期二";
+const QUADS = [
+  { id: "important_urgent", label: "重要且紧急" },
+  { id: "important", label: "重要不紧急" },
+  { id: "urgent", label: "紧急不重要" },
+  { id: "later", label: "稍后" }
+];
+const PEOPLE = {
+  "赵一帆": { auth: "合作方档案", role: "山岚气泡水市场部，负责春节档的投放决策。" },
+  "林晓": { auth: "同事档案", role: "同项目的客户经理，负责排期和对接。" },
+  "陈默": { auth: "同事档案", role: "策略组，负责城市优先级和预算测算。" },
+  "孙悦": { auth: "合作方档案", role: "拾物优选的数据同事，负责回传试投数据。" },
+  "何田": { auth: "课程协作者", role: "AI 课助教，负责收集学员反馈和交稿时间。" },
+  "唐宁": { auth: "课程协作者", role: "AI 课主理人，确定每一讲的主题。" },
+  "吴桐": { auth: "内测用户", role: "Tako 的早期内测用户，反馈过权限提示的问题。" },
+  "高远": { auth: "合作者档案", role: "个人网站的合作者，负责校对和排版。" },
+  "许静": { auth: "同事档案", role: "负责本月报销审核。" },
+  "宋迪": { auth: "家人", role: "在家庭群里张罗聚餐的那位。" }
+};
+let uid = 0;
+const mk = o => Object.assign({ id: "i" + (++uid), people: [], evi: [], hist: [], state: "进行中" }, o);
+let items = [
+  mk({ q: 0, proj: "山岚气泡水", title: "山岚气泡水｜春节投放方案汇报", due: "11月12日 09:00 汇报 · 还有 2 天", tone: "due",
+    next: "按客户给的城市优先级，测算两档预算下保留哪些城市；周三前发项目组核对。",
+    bg: "客户在上周的沟通里给出了春节预算区间，希望看到“保守”和“进取”两档方案。复盘稿已经合并，还缺城市层面的测算。",
+    people: ["赵一帆", "林晓", "陈默"],
+    evi: ["项目群 · 11月6日 客户给出预算区间", "会议逐字稿 · 11月6日 方向沟通", "项目文件 · 复盘会合并稿"],
+    hist: [{ d: "11月6日", t: "客户口头给出春节预算区间，要两档方案。" }, { d: "11月8日", t: "复盘稿合并完成，待补城市测算。" }] }),
+  mk({ q: 0, proj: "拾物优选", title: "拾物优选｜试投城市数据回传", due: "约定日期 · 11月11日", tone: "review",
+    next: "等对方回传两个试投城市的第一周数据，先核对口径，再写进周报。",
+    bg: "昨天的提案会上，对方同意先在两个城市试投，数据每周回传一次。",
+    people: ["孙悦", "林晓"],
+    evi: ["会议逐字稿 · 11月9日 14:00", "邮件 · 11月9日 会后纪要"],
+    hist: [{ d: "11月9日", t: "提案会确定两个城市试投，数据下周回传。" }] }),
+  mk({ q: 0, proj: "AI 课程", title: "AI 课｜第三讲课件定稿", due: "周五前交助教",
+    next: "按上一讲的学员反馈补两个本地案例，删掉重复的概念页。",
+    bg: "第二讲的课后问卷里，学员最常问的是“我们公司从哪一步开始”。第三讲需要更多贴近日常工作的例子。",
+    people: ["何田", "唐宁"],
+    evi: ["课后问卷 · 11月3日", "微信 · 11月8日 助教提醒交稿"],
+    hist: [{ d: "11月3日", t: "收到 46 份课后反馈。" }, { d: "11月8日", t: "助教确认周五交稿。" }] }),
+  mk({ q: 1, proj: "Tako", title: "Tako｜内测反馈修复", due: "本周内",
+    next: "在真机上核对新版本的权限提示；整理第二批内测反馈。",
+    bg: "新版本已经发给内测用户，两条反馈已关闭，还需要在真机上确认权限提示的文案。",
+    people: ["吴桐"],
+    evi: ["代码仓库 · 2 条反馈已关闭", "微信 · 11月7日 更新步骤已发出"],
+    hist: [{ d: "11月7日", t: "新版本发布，两条反馈已关闭。" }, { d: "11月9日", t: "待真机验证。" }] }),
+  mk({ q: 1, proj: "个人网站", title: "个人网站｜《两个框》定稿发布",
+    next: "定稿后发布到个人网站，再同步到公众号。",
+    bg: "初稿和配图已经完成，等合作者校对一遍。",
+    people: ["高远"], evi: ["本地草稿 · 11月9日"], hist: [{ d: "11月9日", t: "初稿与配图完成。" }] }),
+  mk({ q: 2, proj: "报销", title: "报销｜十月发票录入", due: "明天截止", tone: "due",
+    next: "让 Tako 把 6 张发票填进报销系统，提交前我再核对一遍。",
+    bg: "财务提醒本月报销截止，十月还有 6 张发票没录。",
+    people: ["许静"], evi: ["邮件 · 11月5日 报销截止提醒"], hist: [{ d: "11月5日", t: "财务提醒本月截止。" }] }),
+  mk({ q: 3, proj: "家庭", title: "家庭｜周末家庭聚餐",
+    next: "周五前订好餐厅，把地址发到家庭群。",
+    bg: "家庭群里大家定了周日中午，人数八位，有一位老人不吃辣。",
+    people: ["宋迪"], evi: ["家庭群 · 11月2日"], hist: [{ d: "11月2日", t: "大家定了周日中午。" }] }),
+  mk({ q: 3, proj: "阅读", title: "阅读｜整理本月读书笔记",
+    next: "把录音里的三段读书感想整理成一页笔记。",
+    bg: "这个月有两次随手录音提到读书感想，还没整理。",
+    evi: ["随身录音 · 11月4日", "随身录音 · 11月7日"], hist: [] })
+];
+const days = [
+  { date: "2026-11-09", label: "11月9日星期一", list: [
+    mk({ time: "21:40", state: "已完成", proj: "Tako", title: "Tako｜新版本发布", summary: "修复两个权限相关的问题，更新步骤已发给内测用户。", people: ["吴桐"], evi: ["代码仓库 · 2 条反馈已关闭"], hist: [{ d: "11月9日", t: "新版本发布。" }] }),
+    mk({ time: "16:05", state: "已完成", proj: "AI 课程", title: "AI 课｜第二讲复盘", summary: "整理学员提问 23 条，三个高频问题补进第三讲。", people: ["何田"], evi: ["课后问卷 · 46 份"], hist: [] }),
+    mk({ time: "14:20", state: "已完成", proj: "拾物优选", title: "拾物优选｜年度合作提案", summary: "对方确认先做两个城市的试投，数据下周回传；我方同步排期。", people: ["孙悦", "林晓"], evi: ["会议逐字稿 · 14:00", "邮件 · 会后纪要"], hist: [] })
+  ] },
+  { date: "2026-11-08", label: "11月8日星期日", list: [
+    mk({ time: "20:15", state: "已完成", proj: "家庭", title: "家庭｜带父母预约体检", summary: "约好周六上午，报告出来后发家庭群。", people: ["宋迪"], evi: ["家庭群 · 20:15"], hist: [] }),
+    mk({ time: "17:30", state: "已完成", proj: "个人网站", title: "个人网站｜文章配图", summary: "四张示意图完成，配色跟随网站主题。", evi: ["本地文件"], hist: [] })
+  ] },
+  { date: "2026-11-07", label: "11月7日星期六", list: [
+    mk({ time: "11:10", state: "已完成", proj: "运动", title: "运动｜恢复周末跑步", summary: "跑了 5 公里，下周起固定在周六早上。", evi: ["运动记录"], hist: [] }),
+    mk({ time: "10:30", state: "已完成", proj: "阅读", title: "阅读｜读书会分享", summary: "分享了本月读的一本书，记下两个可以用在课上的例子。", evi: ["随身录音 · 10:30"], hist: [] })
+  ] }
+];
+let notes = [{ text: "周四前把课程反馈表发给助教", status: "done", feedback: "已归入「AI 课｜第三讲课件定稿」的下一步。" }];
+let discoveries = [
+  { id: "d1", date: "2026/11/09", status: "new", title: "一家连锁咖啡品牌把会员积分改成“可转赠”，三个月复购率涨了一成",
+    relation: "你在做饮料品牌的春节方案；积分转赠是一个“让老客带新客”的现成样本。",
+    body: ["这家品牌在今年夏天上线了积分转赠：会员可以把积分送给好友，好友用积分兑换时自动注册成会员。品牌在季度沟通会上公布，上线三个月后会员月复购率提高了约一成，新会员里有三成来自转赠。", "值得注意的是，转赠只在节假日前后集中出现，平时使用率很低。这说明它更像节日社交的一个由头，而不是日常的增长手段。", "如果放进春节方案，可以把“送积分”和拜年场景绑在一起，而不是单独做一个积分活动。报道没有给出活动成本，也没有说明复购提升里有多少来自同期的新品。"],
+    source: "行业媒体报道" },
+  { id: "d2", date: "2026/11/09", status: "new", title: "一家家居品牌用 AI 生成两百条短视频脚本，人工只改开头三秒",
+    relation: "你在给 AI 课第三讲找本地案例；这个案例有前后对比的数字。",
+    body: ["品牌的内容团队原来每周产出十条左右的短视频脚本。引入 AI 后，团队先让模型按产品卖点批量生成脚本，再由人只改开头三秒的钩子和结尾的行动号召。", "两个月里共生成两百多条脚本，实际拍摄了六十条。团队负责人说，最大的变化不是数量，而是大家开始用数据挑选开头，而不是凭感觉。", "这个例子适合说明“AI 负责铺量，人负责判断”的分工，但案例来自品牌自述，播放数据没有第三方核实。"],
+    source: "品牌公开分享" },
+  { id: "d3", date: "2026/11/08", status: "new", title: "可能值得认识：一位做零售会员数据分析的独立顾问",
+    relation: "她在公开分享里讲过会员复购模型，和你的饮料品牌方案、AI 课的案例都有关。",
+    body: ["这位顾问过去十年为几家连锁零售品牌做会员数据分析，最近在一场行业分享里讲了“如何用三个指标判断会员活动有没有用”。", "如果想认识，可以先通过共同参加过的课程社群打个招呼，从她分享里的一个具体问题聊起。"],
+    source: "行业分享会" },
+  { id: "d4", date: "2026/11/07", status: "useful", title: "开源笔记工具新增“本地优先”同步，个人知识库可以不上云",
+    relation: "你在给 Tako 设计本地数据存储；这个同步方案可以参考。",
+    body: ["这个笔记工具的新版本把所有数据先存在本机，再在设备之间点对点同步，不经过中心服务器。冲突时保留两个版本，让人自己选。", "对个人助理类产品来说，这种做法能把隐私边界讲清楚，代价是多设备同步更慢、出错时更难排查。"],
+    source: "项目更新日志",
+    response: { text: "下个月做 Tako 存储方案时再看一遍", feedback: "好的，到时候我会把它和现在的存储方式放在一起比较。" } },
+  { id: "d5", date: "2026/11/06", status: "useful", title: "城市公园秋季开放夜跑步道，周五起延长到晚上十点",
+    relation: "你说过想恢复每周跑步；工作日晚上也能跑了。",
+    body: ["市里几处公园的夜跑步道从本周五起延长开放到晚上十点，沿途补了照明和饮水点。"],
+    source: "城市服务公告" },
+  { id: "d6", date: "2026/11/05", status: "dismissed", title: "远帆手机发布新一代折叠屏，主打办公分屏",
+    relation: "你关注过移动办公工具；这条和手头的事关系不大。",
+    body: ["新机型支持三个应用同时分屏，并加入了手写笔记功能。"],
+    source: "新品发布会" }
+];
+const ATTENTION = [
+  { h: "工作", rows: [
+    { n: "山岚气泡水", l: "高", p: "2 个进行中事项：春节投放方案、城市预算测算" },
+    { n: "拾物优选", l: "中", p: "1 个进行中事项：试投城市数据回传" }
+  ] },
+  { h: "认知", rows: [
+    { n: "AI 课程", l: "中", p: "课堂里能用的本地案例、学员高频问题" },
+    { n: "个人工具", l: "中", p: "本地优先的数据存储、桌面助理" }
+  ] },
+  { h: "生活", rows: [ { n: "运动", l: "低", p: "恢复每周跑步" } ] }
+];
+const SOURCES = [
+  { g: "沟通", rows: [
+    { n: "微信", what: "单聊、群聊、文件、已转文字的语音", cad: "每 30 分钟", up: "09:22", dot: "ok", ok: 412, wait: 3, rec: [["09:12", "项目群", "客户确认了试投城市", "拾物优选｜试投城市数据回传"], ["08:47", "家庭群", "聚餐改到周日中午", "家庭｜周末家庭聚餐"]] },
+    { n: "钉钉", what: "本机聊天、图片、已下载附件", cad: "每 30 分钟", up: "09:22", dot: "ok", ok: 136, wait: 0, rec: [["09:05", "项目沟通", "排期表更新到第三版", "山岚气泡水｜春节投放方案汇报"]] },
+    { n: "邮件", what: "收件箱、已发送", cad: "每 30 分钟", up: "09:22", dot: "ok", ok: 28, wait: 0, rec: [["08:30", "财务通知", "本月报销截止提醒", "报销｜十月发票录入"]] },
+    { n: "飞书", what: "个人与工作账号的消息、文档", cad: "每 30 分钟", up: "09:30", dot: "waiting", ok: 54, wait: 6, rec: [["09:18", "课程文档", "助教更新了反馈汇总", "AI 课｜第三讲课件定稿"]] }
+  ] },
+  { g: "会议与录音", rows: [
+    { n: "在场", what: "会议逐字稿、说话人", cad: "会后自动归档", up: "昨天 14:58", dot: "ok", ok: 3, wait: 0, rec: [["昨天", "提案会逐字稿", "确定两个城市试投", "拾物优选｜试投城市数据回传"]] },
+    { n: "PLAUD", what: "随身录音逐字稿", cad: "文字稿到即处理", up: "08:55", dot: "ok", ok: 2, wait: 0, rec: [["08:50", "随身录音", "路上想到的课程开场", "AI 课｜第三讲课件定稿"]] },
+    { n: "腾讯会议", what: "纪要、文字稿", cad: "文字稿到即处理", up: "09:22", dot: "ok", ok: 1, wait: 0, rec: [["昨天", "例会纪要", "下周排期调整", "山岚气泡水｜春节投放方案汇报"]] },
+    { n: "DOWAY", what: "手机已转写的录音", cad: "文字稿到即处理", up: "09:22", dot: "working", ok: 1, wait: 1, rec: [["09:20", "通话录音", "正在转成文字", ""]] }
+  ] },
+  { g: "AI 协作", rows: [
+    { n: "Codex", what: "任务对话与成果", cad: "会话停下后", up: "09:30", dot: "ok", ok: 5, wait: 0, rec: [["09:26", "开发会话", "修好了权限提示文案", "Tako｜内测反馈修复"]] },
+    { n: "Claude", what: "桌面 Code 与 Cowork 会话", cad: "会话停下后", up: "09:30", dot: "ok", ok: 4, wait: 0, rec: [["09:10", "写作会话", "《两个框》改完第三节", "个人网站｜《两个框》定稿发布"]] },
+    { n: "其他 AI 工具", what: "其他 AI 工具里的可见对话", cad: "每 30 分钟", up: "09:22", dot: "waiting", ok: 9, wait: 2, rec: [["08:40", "资料检索", "查了会员复购的公开案例", "山岚气泡水｜春节投放方案汇报"]] }
+  ] },
+  { g: "日程与项目", rows: [
+    { n: "Apple 日历", what: "工作与个人日历，未来 14 天", cad: "每 30 分钟", up: "09:22", dot: "ok", ok: 11, wait: 0, rec: [["09:22", "日程", "周四上午的汇报已在日历上", "山岚气泡水｜春节投放方案汇报"]] },
+    { n: "项目资料", what: "事项关联的项目主本改动", cad: "每 30 分钟", up: "09:22", dot: "ok", ok: 7, wait: 0, rec: [["09:00", "项目文件", "复盘稿新增城市测算表", "山岚气泡水｜春节投放方案汇报"]] }
+  ] }
+];
+const UNCOLLECTED = [
+  ["Claude 网页与桌面对话", "内容不在本机，目前没有接入"],
+  ["钉钉听记", "已按你的决定停止自动采集"],
+  ["微信里没转文字的语音", "需要先在手机上转成文字"]
+];
+
+/* ---------- 工具 ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const reduced = () => window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+const ICONS = {
+  clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16.5 12"/>',
+  book: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+  arrowRight: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  chevronDown: '<path d="m6 9 6 6 6-6"/>',
+  chevronLeft: '<path d="m15 18-6-6 6-6"/>',
+  chevronRight: '<path d="m9 18 6-6-6-6"/>',
+  grip: '<circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/>',
+  noteAdd: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 7v6"/><path d="M9 10h6"/>',
+  clip: '<path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/>',
+  ext: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+  msg: '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+  heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+  eyeOff: '<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/>',
+  arrowUp: '<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>',
+  x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>'
+};
+const ic = (name, size = 16) => `<svg class="i" width="${size}" height="${size}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>`;
+const codexBtn = () => `<span class="card-codex-entry"><button type="button" class="card-codex" data-codex aria-label="在 Codex 中继续" title="在 Codex 中继续"><svg aria-hidden="true"><use href="#codex-mark"/></svg></button></span>`;
+const example = input => { const v = input.value.trim(); if (v) return v; const m = (input.getAttribute("placeholder") || "").split("比如：")[1]; return m || ""; };
+function find(id) {
+  for (const it of items) if (it.id === id) return it;
+  for (const d of days) for (const it of d.list) if (it.id === id) return it;
+  return null;
+}
+
+/* 高度同步：每次布局变化后通知文章页（用 setTimeout，不用 requestAnimationFrame） */
+function post() {
+  setTimeout(() => {
+    try { parent.postMessage({ twoBoxesDemoHeight: Math.ceil(document.body.getBoundingClientRect().height) }, "*"); } catch (e) {}
+  }, 0);
+}
+/* 浮层若超出页面底部，临时撑高页面，避免在 iframe 里被截断 */
+function fit(el) {
+  if (!el) return;
+  const need = Math.ceil(el.getBoundingClientRect().bottom + window.scrollY + 24);
+  if (need > document.body.getBoundingClientRect().height) document.body.style.minHeight = need + "px";
+}
+function unfit() { if (!document.querySelector(".desk-dialog-backdrop, .desk-person[open], .desk-placement-menu[open]")) document.body.style.minHeight = ""; }
+
+let toastTimer;
+function toast(text, anchor) {
+  const el = $("#toast");
+  el.textContent = text;
+  let top = window.scrollY + 16;
+  if (anchor && anchor.isConnected) {
+    const r = anchor.getBoundingClientRect();
+    top = r.top + window.scrollY - 46;
+    if (top < window.scrollY + 8) top = r.bottom + window.scrollY + 10;
+  }
+  el.style.top = Math.max(8, top) + "px";
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2200);
+}
+
+/* ---------- 今日 ---------- */
+let quad = 0, composer = null, noteOpen = false;
+function personChips(list) {
+  return list.map(p => {
+    const info = PEOPLE[p] || { auth: "", role: "" };
+    return `<details class="desk-person"><summary><span class="desk-person-dot"></span>${esc(p)}</summary><div class="desk-person-popover"><strong>${esc(p)}</strong><div class="desk-person-candidate">${info.auth ? `<small class="desk-person-authority">${esc(info.auth)}</small>` : ""}${info.role ? `<p>${esc(info.role)}</p>` : ""}</div><div class="desk-person-menu"><button type="button" class="desk-person-correct" data-related="${esc(p)}">所有相关</button><button type="button" class="desk-person-correct" data-correct="${esc(p)}">纠正身份</button></div></div></details>`;
+  }).join("");
+}
+function composerHtml(it) {
+  if (!composer || composer.id !== it.id) return "";
+  if (composer.sent) return `<div class="desk-inline-composer desk-context-composer"><button type="button" class="desk-expand" data-close-composer>收起</button><section class="desk-note-panel" aria-label="回应"><div class="desk-note-heading">${ic("noteAdd", 18)}<h2>回应</h2><span>${esc(it.title)}</span></div><div class="desk-saved-note"><span class="is-done">已存档</span><p>${esc(composer.sent)}</p><p class="desk-note-feedback">已作为新痕迹存档，详情的推进记录里能看到。</p></div></section></div>`;
+  return `<div class="desk-inline-composer desk-context-composer"><button type="button" class="desk-expand" data-close-composer>收起</button><section class="desk-note-panel" aria-label="回应"><div class="desk-note-heading">${ic("noteAdd", 18)}<h2>回应</h2><span>${esc(it.title)}</span></div><form data-reply-form="${it.id}" autocomplete="off"><label class="sr-only" for="reply-${it.id}">回应内容</label><div class="desk-note-line"><input id="reply-${it.id}" maxlength="60" placeholder="补充、修改或提问，比如：客户改到下周一了"><button type="button" class="attachment-button" disabled title="示例里不能加附件">${ic("clip", 17)}</button></div><div class="desk-note-submit"><span></span><button type="submit">发送 ${ic("arrowRight", 15)}</button></div></form></section></div>`;
+}
+function boardCard(it) {
+  const q = QUADS[it.q];
+  const moves = QUADS.map((x, n) => `<button type="button" data-move="${it.id}" data-to="${n}" ${n === it.q ? "disabled" : ""}>${esc(x.label)}</button>`).join("");
+  return `<li class="desk-event desk-board-event${it.fresh ? " is-new" : ""}" data-card="${it.id}">
+    <details class="desk-placement-menu"><summary class="desk-drag-handle" aria-label="移动 ${esc(it.title)}" title="选择放到哪个象限">${ic("grip", 17)}</summary><div class="desk-placement-options"><small>移到</small>${moves}</div></details>
+    <div class="desk-card-intelligence">${codexBtn()}</div>
+    <div class="desk-event-body">
+      <div class="desk-event-meta"><span>${esc(it.proj)}</span><span class="desk-event-state">${esc(it.state)}</span></div>
+      <div><h3><button type="button" class="desk-event-title" data-detail="${it.id}">${esc(it.title)}${ic("chevronDown", 17)}</button></h3></div>
+      ${it.due ? `<div class="desk-card-dates"><span class="${it.tone ? "desk-timing-" + it.tone : ""}">${esc(it.due)}</span></div>` : ""}
+      <p class="desk-next-action">${ic("arrowRight", 15)}<span>${esc(it.next)}</span></p>
+      <div class="desk-action-row is-compact"><div class="desk-action-controls"><button type="button" class="action-circle" data-done="${it.id}" aria-label="完成" title="完成">完成</button><button type="button" class="action-text" data-reply="${it.id}" aria-expanded="${composer && composer.id === it.id ? "true" : "false"}">回应</button></div></div>
+      ${composerHtml(it)}
+      <div class="desk-event-bottom"><div class="desk-person-list">${it.people.length ? `<span class="desk-related-label">相关人</span>${personChips(it.people)}` : ""}</div><button type="button" class="desk-expand" data-detail="${it.id}">详情 ${ic("chevronDown", 15)}</button></div>
+    </div>
+  </li>`;
+}
+function noteComposerHtml() {
+  if (!noteOpen) return "";
+  const saved = notes.map(n => `<div class="desk-saved-note"><span class="${n.status === "done" ? "is-done" : ""}">${n.status === "done" ? "已整理" : "整理中…"}</span><p>${esc(n.text)}</p>${n.feedback ? `<p class="desk-note-feedback">${esc(n.feedback)}</p>` : ""}</div>`).join("");
+  return `<div class="desk-inline-composer" id="noteComposer"><button type="button" class="desk-expand" data-close-note>收起</button><section class="desk-note-panel" aria-label="记一下"><div class="desk-note-heading">${ic("noteAdd", 18)}<h2>记一下</h2></div><form id="noteForm" autocomplete="off"><label class="sr-only" for="noteInput">记下的内容</label><div class="desk-note-line"><input id="noteInput" maxlength="40" placeholder="写下想记的事，比如：下周约设计师聊官网改版"><button type="button" class="attachment-button" disabled title="请先从具体事项打开“回应”">${ic("clip", 17)}</button></div><div class="desk-note-submit"><span>记下后会自动整理成事项</span><button type="submit">发送 ${ic("arrowRight", 15)}</button></div></form>${saved ? `<div class="desk-recent-notes"><h3>已提交</h3>${saved}</div>` : ""}</section></div>`;
+}
+function renderToday() {
+  const newCount = discoveries.filter(d => d.status === "new").length;
+  const list = items.filter(it => it.q === quad);
+  $("#today").innerHTML = `
+    <section class="desk-title-row"><div class="desk-heading-line"><h1>今日</h1><span class="desk-date">${TODAY_LABEL}</span></div><div class="desk-toolbar"><button type="button" class="desk-refresh" id="noteBtn" aria-expanded="${noteOpen}">记一下</button></div></section>
+    <section class="status-line status-quiet"><button type="button" class="status-line-main" data-go="sources" aria-label="最近采集 09:30，查看来源">${ic("clock", 18)}<span>最近采集 09:30</span></button></section>
+    <button type="button" class="news-entrance news-entrance-home" data-go="discoveries">${ic("book", 16)}<span><strong>发现</strong></span><span class="news-entrance-count">${newCount ? newCount + " 条新内容" : "没有新内容"}</span>${ic("arrowRight", 15)}</button>
+    ${noteComposerHtml()}
+    <div class="desk-layout"><section class="desk-events" aria-label="今日事项">
+      <div class="desk-list-heading tight"><h2>事项<span>${items.length} 件</span></h2><span>更新 09:30</span></div>
+      <div class="desk-quadrant-board">
+        <div class="desk-quadrant-nav"><div class="desk-quadrant-tabs" role="tablist" aria-label="重要与紧急四象限">${QUADS.map((x, n) => `<button type="button" class="desk-quadrant-tab quadrant-${x.id}" role="tab" aria-selected="${n === quad}" data-q="${n}"><span class="desk-quadrant-tab-title"><span class="desk-quadrant-number">${n + 1}</span><strong>${x.label}</strong><span class="desk-quadrant-count">${items.filter(it => it.q === n).length}<span class="sr-only">件</span></span></span></button>`).join("")}</div></div>
+        <section class="desk-quadrant quadrant-${QUADS[quad].id}" role="tabpanel"><ol class="desk-event-list">${list.length ? list.map(boardCard).join("") : `<li class="desk-quadrant-empty">这个象限没有事了。</li>`}</ol></section>
+      </div>
+    </section></div>`;
+  items.forEach(it => { it.fresh = false; });
+}
+
+/* ---------- 昨日 ---------- */
+let day = 0;
+function dayCard(it, n) {
+  return `<li class="desk-event${it.fresh ? " is-new" : ""}" data-card="${it.id}">
+    <div class="desk-event-index">${String(n + 1).padStart(2, "0")}</div>
+    <div class="desk-card-intelligence">${codexBtn()}</div>
+    <div class="desk-event-body">
+      <div class="desk-event-meta"><span>${esc(it.time)}</span><span class="desk-event-state">${esc(it.state)}</span></div>
+      <div><h3><button type="button" class="desk-event-title" data-detail="${it.id}">${esc(it.title)}${it.fresh ? '<span class="card-unread-dot" role="img" aria-label="有未读更新"></span>' : ""}${ic("chevronDown", 17)}</button></h3></div>
+      <p class="desk-summary">${esc(it.summary)}</p>
+      <div class="desk-action-row is-compact"><div class="desk-action-controls"><button type="button" class="action-text" data-reply="${it.id}" aria-expanded="${composer && composer.id === it.id ? "true" : "false"}">回应</button></div></div>
+      ${composerHtml(it)}
+      <div class="desk-event-bottom"><div class="desk-person-list">${it.people.length ? `<span class="desk-related-label">相关人</span>${personChips(it.people)}` : ""}</div><button type="button" class="desk-expand" data-detail="${it.id}">详情 ${ic("chevronDown", 15)}</button></div>
+    </div>
+  </li>`;
+}
+function renderYesterday() {
+  const d = days[day];
+  $("#yesterday").innerHTML = `
+    <section class="desk-title-row"><div class="desk-heading-line"><h1>昨日</h1><span class="desk-date">${d.label}</span></div><div class="desk-toolbar"><button type="button" class="desk-refresh" data-note-from-yesterday>记一下</button></div></section>
+    <div class="desk-date-control"><button type="button" id="yprev" aria-label="查看前一天" ${day === days.length - 1 ? "disabled" : ""}>${ic("chevronLeft", 16)}</button><input type="date" id="ydate" aria-label="回看日期" value="${d.date}" min="${days[days.length - 1].date}" max="${days[0].date}"><button type="button" id="ynext" aria-label="查看后一天" ${day === 0 ? "disabled" : ""}>${ic("chevronRight", 16)}</button></div>
+    <div class="desk-layout"><section class="desk-events" aria-label="昨日事项">
+      <div class="desk-list-heading"><h2>事项<span>${d.list.length} 件</span></h2><span>按实际发生的那一天归档</span></div>
+      <ol class="desk-event-list">${d.list.map(dayCard).join("")}</ol>
+    </section></div>`;
+  d.list.forEach(it => { it.fresh = false; });
+}
+
+/* ---------- 发现 ---------- */
+let filter = "new", dateFilter = "", openDisc = new Set(), replyDisc = null, undo = null, attentionNote = "";
+const LONG = 150;
+function discCard(it, n) {
+  const full = it.body.join("");
+  const long = [...full].length > LONG;
+  const open = openDisc.has(it.id) || !long;
+  const body = open ? it.body.map(p => `<p>${esc(p)}</p>`).join("") : `<p>${esc([...full].slice(0, LONG).join(""))}…</p>`;
+  const resp = it.response ? `<div class="discovery-response"><strong>回应记录</strong><div class="markdown"><p>${esc(it.response.text)}</p></div>${it.response.feedback ? `<div class="discovery-feedback"><div class="markdown"><p>${esc(it.response.feedback)}</p></div></div>` : `<div class="discovery-feedback is-pending"><p>正在理解你的回应…</p></div>`}</div>` : "";
+  return `<li><article class="desk-event discovery-card" data-disc-card="${it.id}">
+    <span class="desk-event-index">${String(n + 1).padStart(2, "0")}</span>
+    <div class="desk-event-body">
+      <div class="desk-event-meta"><span>${it.date}</span>${it.status === "useful" ? "<span>有启发</span>" : ""}${it.status === "dismissed" ? "<span>已忽略</span>" : ""}</div>
+      <div class="discovery-title-row">${long ? `<button type="button" class="discovery-title" aria-expanded="${open}" data-disc-open="${it.id}"><h3>${esc(it.title)}</h3>${ic("chevronDown", 17)}</button>` : `<h3>${esc(it.title)}</h3>`}<button type="button" class="card-codex" data-codex aria-label="在 Codex 中继续" title="在 Codex 中继续"><svg aria-hidden="true"><use href="#codex-mark"/></svg></button></div>
+      <p class="discovery-relation">${esc(it.relation)}</p>
+      <div class="discovery-body">${body}</div>
+      ${long ? `<button type="button" class="discovery-read-more" data-disc-open="${it.id}">${open ? "收起正文" : "阅读全文"}</button>` : ""}
+      <button type="button" class="discovery-primary-source" data-source-note="${esc(it.source)}">阅读原文 ${ic("ext", 13)}</button>
+      <div class="discovery-actions"><button type="button" class="discovery-respond" data-disc-reply="${it.id}" aria-expanded="${replyDisc === it.id}">${ic("msg", 15)}${replyDisc === it.id ? "收起" : "回应"}</button><button type="button" aria-label="有启发" title="有启发" aria-pressed="${it.status === "useful"}" data-disc-useful="${it.id}">${ic("heart", 16)}</button><button type="button" aria-label="${it.status === "dismissed" ? "恢复" : "忽略"}" title="${it.status === "dismissed" ? "恢复" : "忽略这条"}" data-disc-dismiss="${it.id}">${ic("eyeOff", 16)}</button></div>
+      ${replyDisc === it.id ? `<form class="discovery-composer" data-disc-form="${it.id}" autocomplete="off"><textarea rows="3" maxlength="200" aria-label="回应「${esc(it.title)}」" placeholder="补充、修改或提问，比如：这个可以当课上的案例"></textarea><button type="submit">${ic("arrowUp", 17)}发送</button></form>` : ""}
+      ${resp}
+    </div></article></li>`;
+}
+function renderDiscoveries() {
+  const dates = [...new Set(discoveries.map(d => d.date))];
+  const scoped = discoveries.filter(d => !dateFilter || d.date === dateFilter);
+  const views = [["new", "新发现"], ["useful", "有启发"], ["dismissed", "已忽略"]];
+  const list = scoped.filter(d => d.status === filter);
+  const label = { 高: "高", 中: "中", 低: "低" };
+  $("#discoveries").innerHTML = `<section class="discoveries-page">
+    <header class="discoveries-heading"><h1>发现</h1><div class="discoveries-toolbar"><label>日期<select id="discDate" aria-label="选择发现日期"><option value="">全部日期</option>${dates.map(d => `<option value="${d}" ${d === dateFilter ? "selected" : ""}>${d}</option>`).join("")}</select>${ic("chevronDown", 15)}</label></div></header>
+    <nav class="discoveries-filters" aria-label="发现分类">${views.map(([k, v]) => `<button type="button" aria-pressed="${filter === k}" data-filter="${k}">${v}<span>${scoped.filter(d => d.status === k).length}</span></button>`).join("")}</nav>
+    ${undo ? `<div class="discoveries-undo" role="status"><span>${undo.text}</span><button type="button" data-undo>撤销</button><button type="button" aria-label="关闭提示" data-undo-close>×</button></div>` : ""}
+    <details class="attention-panel" id="attention"><summary><span>我在关注</span><small>今天已更新 · 08:10</small></summary><div class="attention-body">
+      ${ATTENTION.map(s => `<section><h3>${s.h}</h3><ul>${s.rows.map(r => `<li><div><strong>${esc(r.n)}</strong><span class="attention-level" data-level="${label[r.l]}">${r.l}</span></div><p>${esc(r.p)}</p></li>`).join("")}</ul></section>`).join("")}
+      ${attentionNote ? `<p class="discovery-response" style="margin:0">已记下：${esc(attentionNote)}。明天起按新的关注点找。</p>` : ""}
+      <form class="attention-composer" id="attentionForm" autocomplete="off"><input id="attentionInput" aria-label="调整关注点" placeholder="想调整就直接说，比如「电商平台先放一放」「多看看跑步」"><button type="submit">告诉我 ${ic("arrowUp", 14)}</button></form>
+    </div></details>
+    <ul class="desk-event-list discoveries-list">${list.length ? list.map(discCard).join("") : `<li class="discoveries-empty">这里暂时没有内容。</li>`}</ul>
+  </section>`;
+  if (attentionOpen) $("#attention").open = true;
+}
+let attentionOpen = false;
+
+/* ---------- 来源 ---------- */
+let openSource = null;
+function renderSources() {
+  let n = 0;
+  $("#sources").innerHTML = `<section class="desk-sources">
+    <section class="page-heading"><h1>来源</h1></section>
+    <p class="catalog-summary" role="status">已接入 13 个来源 · 最近采集 09:30</p>
+    ${SOURCES.map(g => `<section class="catalog-group" aria-label="${g.g}"><h2>${g.g}</h2>${g.rows.map(r => { const id = "s" + (n++); const open = openSource === id; return `<div class="catalog-item"><button type="button" class="catalog-row" aria-expanded="${open}" data-source="${id}"><span class="catalog-name"><span class="catalog-dot dot-${r.dot}" title="${{ ok: "正常", working: "处理中", waiting: "待更新", needs_you: "需要你" }[r.dot]}"></span>${esc(r.n)}</span><span class="catalog-what">${esc(r.what)}</span><span class="catalog-cadence">${esc(r.cad)}</span><span class="catalog-updated">${esc(r.up)}</span><span class="catalog-today">${open ? "收起记录" : "查看记录"}</span></button>${open ? `<div class="catalog-detail"><p class="health-meta">今日来源记录：已核对 ${r.ok} 条，后台队列 ${r.wait} 条。按消息片段或原件计数，不等于待办事项。</p><ul class="catalog-records">${r.rec.map(x => `<li><time>${x[0]}</time><span>${esc(x[1])} · ${esc(x[2])}${x[3] ? ` → 归入<b>「${esc(x[3])}」</b>` : ""}</span></li>`).join("")}</ul><p class="health-meta" style="margin-top:8px">以上为示例记录；实际页面里每条都能点开原文。</p></div>` : ""}</div>`; }).join("")}</section>`).join("")}
+    <details class="catalog-uncollected"><summary>未采集的 ${UNCOLLECTED.length} 项</summary>${UNCOLLECTED.map(x => `<p><strong>${x[0]}</strong>：${x[1]}</p>`).join("")}</details>
+    <p class="catalog-legend"><span class="catalog-dot dot-ok"></span>正常 <span class="catalog-dot dot-working"></span>处理中 <span class="catalog-dot dot-waiting"></span>待更新 <span class="catalog-dot dot-needs_you"></span>需要你</p>
+  </section>`;
+}
+
+/* ---------- 弹层：详情与所有相关 ---------- */
+let opener = null;
+function openDialog(label, html, anchor) {
+  const prev = document.querySelector(".desk-detail-drawer");
+  const y = prev ? parseFloat(prev.style.marginTop) + 160 : anchor && anchor.isConnected ? anchor.getBoundingClientRect().top + window.scrollY : window.scrollY;
+  closeDialog(true);
+  const back = document.createElement("div");
+  back.className = "desk-dialog-backdrop";
+  back.setAttribute("data-modal-layer", "");
+  back.innerHTML = `<section class="desk-detail-drawer" role="dialog" aria-modal="true" aria-label="${esc(label)}">${html}</section>`;
+  document.body.appendChild(back);
+  const panel = back.firstElementChild;
+  panel.style.marginTop = Math.max(16, y - 160) + "px";
+  $("#shell").inert = true; document.querySelector(".demo-topbar").inert = true;
+  if (!opener) opener = anchor;
+  fit(panel);
+  const close = panel.querySelector(".dialog-close");
+  if (close) close.focus({ preventScroll: true });
+  post();
+}
+function closeDialog(silent) {
+  const back = document.querySelector(".desk-dialog-backdrop");
+  if (!back) return;
+  back.remove();
+  $("#toast").classList.remove("show");
+  $("#shell").inert = false; document.querySelector(".demo-topbar").inert = false;
+  if (!silent) {
+    unfit();
+    if (opener && opener.isConnected) opener.focus({ preventScroll: true });
+    opener = null;
+    post();
+  }
+}
+function showDetail(id, anchor) {
+  const it = find(id); if (!it) return;
+  const isToday = items.includes(it);
+  const hist = it.hist.map(h => `<div class="desk-drawer-action${h.isNew ? " is-new" : ""}"><small>${esc(h.d)}</small><p class="desk-history-feedback">${esc(h.t)}</p></div>`).join("");
+  const html = `<header><h2>${esc(it.title)}</h2><div class="desk-detail-header-actions">${codexBtn()}<button type="button" class="dialog-close" data-close-dialog aria-label="关闭详情">${ic("x", 20)}</button></div></header>
+    ${isToday ? `<section class="desk-drawer-plan" aria-label="行动安排"><p><b>下一步</b>${esc(it.next)}</p>${it.due ? `<p><b>约定日期</b>${esc(it.due)}</p>` : ""}</section>` : `<section class="desk-detail-section"><h3>当天进展</h3><div class="markdown"><p>${esc(it.summary)}</p></div></section>`}
+    ${it.bg ? `<details class="desk-detail-history"><summary>相关背景</summary><div class="markdown"><p>${esc(it.bg)}</p></div></details>` : ""}
+    ${it.people.length ? `<section class="desk-detail-section"><h3>关键合作人</h3><div class="desk-person-list">${personChips(it.people)}</div></section>` : ""}
+    <section class="desk-detail-section desk-detail-sources"><h3>依据</h3>${it.evi.map(e => `<button type="button" class="markdown-link" data-evidence>${esc(e)}${ic("ext", 13)}</button>`).join("")}</section>
+    <details class="desk-detail-history" open><summary>推进记录</summary>${hist || `<p class="desk-history-feedback">还没有推进记录。</p>`}</details>
+    <div class="desk-action-controls desk-detail-controls"><button type="button" class="desk-context-note" data-dialog-reply="${it.id}">回应</button></div>`;
+  openDialog("事项详情", html, anchor);
+}
+function showRelated(name, anchor) {
+  const rel = items.filter(it => it.people.includes(name));
+  const html = `<header><h2>${esc(name)} · 所有相关</h2><button type="button" class="dialog-close" data-close-dialog aria-label="关闭所有相关">${ic("x", 20)}</button></header>
+    <p class="desk-related-count">${rel.length} 件未完成事项 · 全部象限</p>
+    <ol class="desk-related-items">${rel.map(it => `<li class="desk-related-card"><div class="desk-event-meta"><span>${QUADS[it.q].label}</span><span>${esc(it.state)}</span></div><h3><button type="button" data-detail="${it.id}">${esc(it.title)}</button></h3><p class="desk-next-action"><b>下一步</b>${esc(it.next)}</p><button type="button" class="desk-expand" data-detail="${it.id}">详情 ${ic("chevronDown", 15)}</button></li>`).join("")}</ol>`;
+  openDialog("所有相关", html, anchor);
+}
+
+/* ---------- 页面切换 ---------- */
+let page = "today";
+function render() {
+  if (page === "today") renderToday();
+  if (page === "yesterday") renderYesterday();
+  if (page === "discoveries") renderDiscoveries();
+  if (page === "sources") renderSources();
+  post();
+}
+function go(name) {
+  page = name;
+  document.querySelectorAll(".desk-nav button").forEach(b => { const on = b.dataset.go === name; b.classList.toggle("selected", on); if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+  document.querySelectorAll("[data-page]").forEach(s => { s.hidden = s.dataset.page !== name; });
+  composer = null;
+  closeDialog(true); document.body.style.minHeight = ""; opener = null;
+  render();
+}
+
+/* ---------- 交互 ---------- */
+function closePopovers(except) {
+  document.querySelectorAll(".desk-person[open], .desk-placement-menu[open]").forEach(d => { if (d !== except) d.open = false; });
+}
+document.addEventListener("toggle", e => {
+  const d = e.target;
+  if (!(d instanceof HTMLDetailsElement)) return;
+  if (d.open && (d.classList.contains("desk-person") || d.classList.contains("desk-placement-menu"))) {
+    closePopovers(d);
+    const pop = d.querySelector(".desk-person-popover");
+    if (pop) {
+      pop.style.left = "0px";
+      const r = pop.getBoundingClientRect(), vw = document.documentElement.clientWidth;
+      let shift = 0;
+      if (r.right > vw - 16) shift = vw - 16 - r.right;
+      if (r.left + shift < 16) shift = 16 - r.left;
+      pop.style.left = shift + "px";
+    }
+    fit(pop || d.querySelector(".desk-placement-options"));
+  } else if (!d.open) unfit();
+  if (d.id === "attention") attentionOpen = d.open;
+  post();
+}, true);
+
+document.addEventListener("click", e => {
+  const t = e.target.closest("button, a, summary");
+  if (!e.target.closest(".desk-person, .desk-placement-menu")) closePopovers();
+  if (e.target.classList && e.target.classList.contains("desk-dialog-backdrop")) { closeDialog(); return; }
+  if (!t) return;
+  const ds = t.dataset;
+  if (ds.go) { e.preventDefault(); go(ds.go); return; }
+  if (ds.closeDialog !== undefined) { closeDialog(); return; }
+  if (ds.codex !== undefined) { toast("实际工作台会带着这件事的背景打开 Codex", t); return; }
+  if (ds.evidence !== undefined) { toast("实际工作台里点开就是原文；示例不提供原文", t); return; }
+  if (ds.sourceNote) { toast("示例条目，原文来自：" + ds.sourceNote, t); return; }
+
+  // 今日
+  if (ds.q) { quad = +ds.q; composer = null; render(); return; }
+  if (t.id === "noteBtn") { noteOpen = !noteOpen; render(); if (noteOpen) $("#noteInput").focus({ preventScroll: true }); return; }
+  if (ds.noteFromYesterday !== undefined) { noteOpen = true; go("today"); $("#noteInput").focus({ preventScroll: true }); return; }
+  if (ds.closeNote !== undefined) { noteOpen = false; render(); return; }
+  if (ds.detail) { showDetail(ds.detail, t); return; }
+  if (ds.related) { const d = t.closest("details"); if (d) d.open = false; const anchor = t.closest(".desk-person") ? t.closest(".desk-person").querySelector("summary") : t; showRelated(ds.related, anchor); return; }
+  if (ds.correct) {
+    const d = t.closest("details"); if (d) d.open = false;
+    const card = t.closest("[data-card]");
+    if (card) { composer = { id: card.dataset.card }; render(); const input = document.querySelector(`[data-reply-form="${card.dataset.card}"] input`); if (input) { input.placeholder = `比如：${ds.correct}其实是对方的品牌负责人`; input.focus({ preventScroll: true }); } }
+    else { const r = t.closest(".desk-detail-drawer") && t.closest(".desk-detail-drawer").querySelector("[data-dialog-reply]"); closeDialog(true); unfit(); opener = null; if (r) { composer = { id: r.dataset.dialogReply }; render(); const input = document.querySelector(`[data-reply-form="${r.dataset.dialogReply}"] input`); if (input) { input.placeholder = `比如：${ds.correct}其实是对方的品牌负责人`; input.focus({ preventScroll: true }); } } else post(); }
+    return;
+  }
+  if (ds.reply) { composer = composer && composer.id === ds.reply && !composer.sent ? null : { id: ds.reply }; render(); const input = document.querySelector(`[data-reply-form="${ds.reply}"] input`); if (input) input.focus({ preventScroll: true }); return; }
+  if (ds.dialogReply) { const id = ds.dialogReply; closeDialog(true); unfit(); opener = null; composer = { id }; render(); const input = document.querySelector(`[data-reply-form="${id}"] input`); if (input) input.focus({ preventScroll: true }); return; }
+  if (ds.closeComposer !== undefined) { composer = null; render(); return; }
+  if (ds.move) {
+    const it = find(ds.move), to = +ds.to;
+    it.q = to; render(); toast(`已移到「${QUADS[to].label}」`, document.querySelector(".desk-quadrant-tabs")); return;
+  }
+  if (ds.done) {
+    const it = find(ds.done), card = t.closest(".desk-event");
+    const finish = () => {
+      items = items.filter(x => x !== it);
+      it.state = "已完成"; it.time = "刚刚"; it.summary = "已完成：" + it.next; it.fresh = true;
+      it.hist = it.hist.concat([{ d: "刚刚", t: "你标记了完成。", isNew: true }]);
+      days[0].list.unshift(it);
+      if (composer && composer.id === it.id) composer = null;
+      const tabs = document.querySelector(".desk-quadrant-tabs");
+      render();
+      toast(`已完成，记入昨日 · ${days[0].label.replace(/星期.$/, "")}`, tabs);
+    };
+    card.classList.add("is-leaving");
+    setTimeout(finish, reduced() ? 0 : 350);
+    return;
+  }
+
+  // 昨日
+  if (t.id === "yprev" && day < days.length - 1) { day++; composer = null; render(); return; }
+  if (t.id === "ynext" && day > 0) { day--; composer = null; render(); return; }
+
+  // 发现
+  if (ds.filter) { filter = ds.filter; replyDisc = null; render(); return; }
+  if (ds.discOpen) { const id = ds.discOpen; openDisc.has(id) ? openDisc.delete(id) : openDisc.add(id); render(); return; }
+  if (ds.discReply) { replyDisc = replyDisc === ds.discReply ? null : ds.discReply; render(); const ta = document.querySelector(`[data-disc-form="${ds.discReply}"] textarea`); if (ta) ta.focus({ preventScroll: true }); return; }
+  if (ds.discUseful || ds.discDismiss) {
+    const id = ds.discUseful || ds.discDismiss, it = discoveries.find(d => d.id === id), prev = it.status;
+    const card = t.closest(".discovery-card");
+    if (ds.discUseful) it.status = prev === "useful" ? "new" : "useful";
+    else it.status = prev === "dismissed" ? "new" : "dismissed";
+    const name = { new: "新发现", useful: "有启发", dismissed: "已忽略" }[it.status];
+    const verb = it.status === "useful" ? "已标记有启发" : it.status === "dismissed" ? "已忽略" : "已放回新发现";
+    undo = { id, prev, text: `${verb}「${esc(it.title.slice(0, 18))}…」` };
+    const anchor = card;
+    toast(it.status === "dismissed" ? "已忽略，以后少推类似内容" : `${verb}，可在「${name}」里找到`, anchor);
+    if (replyDisc === id) replyDisc = null;
+    render(); return;
+  }
+  if (ds.undo !== undefined && undo) { const it = discoveries.find(d => d.id === undo.id); it.status = undo.prev; undo = null; render(); return; }
+  if (ds.undoClose !== undefined) { undo = null; render(); return; }
+
+  // 来源
+  if (ds.source) { openSource = openSource === ds.source ? null : ds.source; render(); return; }
+});
+
+document.addEventListener("change", e => {
+  if (e.target.id === "ydate") { const i = days.findIndex(d => d.date === e.target.value); if (i >= 0) { day = i; composer = null; render(); } else { toast("示例里只有 11月7日 到 11月9日", e.target); e.target.value = days[day].date; } }
+  if (e.target.id === "discDate") { dateFilter = e.target.value; render(); }
+});
+
+document.addEventListener("submit", e => {
+  e.preventDefault();
+  const f = e.target;
+  if (f.id === "noteForm") {
+    const input = $("#noteInput"), text = example(input);
+    if (!text) return;
+    const note = { text, status: "processing" };
+    notes.unshift(note);
+    const it = mk({ q: 1, proj: "记一下", state: "整理中", title: "整理中｜" + text, next: "正在读这条记录，判断归到哪个项目…", evi: ["记一下 · 刚刚"], hist: [{ d: "刚刚", t: "你记下：" + text, isNew: true }], fresh: true });
+    items.push(it); quad = 1; render();
+    toast("已记下，正在整理", $("#noteComposer") || $("#noteBtn"));
+    setTimeout(() => {
+      it.proj = "个人"; it.state = "进行中"; it.title = "个人｜" + text; it.due = "本周内";
+      it.next = "本周内约个时间，先把要点列出来发给对方。";
+      it.bg = "来自你在“记一下”里写的一句话，已归入个人事项。"; it.fresh = true;
+      note.status = "done"; note.feedback = "已整理成事项，放在「重要不紧急」。";
+      if (page === "today") { render(); toast("已整理成事项", document.querySelector(`[data-card="${it.id}"]`)); }
+    }, 1400);
+    return;
+  }
+  if (f.dataset.replyForm) {
+    const id = f.dataset.replyForm, it = find(id), input = f.querySelector("input"), text = example(input);
+    if (!text) return;
+    it.hist.forEach(h => { h.isNew = false; });
+    it.hist.push({ d: "刚刚", t: "你的回应：" + text, isNew: true });
+    composer = { id, sent: text }; render();
+    toast("已作为新痕迹存档", document.querySelector(`[data-card="${id}"] .desk-saved-note`));
+    return;
+  }
+  if (f.dataset.discForm) {
+    const id = f.dataset.discForm, it = discoveries.find(d => d.id === id), ta = f.querySelector("textarea"), text = example(ta);
+    if (!text) return;
+    it.response = { text, feedback: "" }; replyDisc = null; render();
+    toast("已记下这条回应", document.querySelector(`[data-disc-card="${id}"] .discovery-response`));
+    setTimeout(() => { it.response.feedback = "好的，之后找类似内容时会参考这一点。"; if (page === "discoveries") render(); }, 1200);
+    return;
+  }
+  if (f.id === "attentionForm") {
+    const input = $("#attentionInput"), text = input.value.trim() || "多看看跑步";
+    attentionNote = text; render(); toast("已记下，明天起按新的关注点找", $("#attentionForm"));
+    return;
+  }
+});
+
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (document.querySelector(".desk-dialog-backdrop")) { closeDialog(); return; }
+  closePopovers(); unfit(); post();
+});
+
+window.addEventListener("load", post);
+window.addEventListener("resize", post);
+if (window.ResizeObserver) new ResizeObserver(post).observe(document.body);
+render();
+</script>
+</body>
+</html>
